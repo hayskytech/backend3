@@ -38,6 +38,7 @@ app.get("/students", (req, res) => {
 
 app.post("/students", (req, res) => {
   const { student, father, phone, address } = req.body;
+
   const sql = "INSERT INTO student (student,father,phone,address) VALUES (?,?,?,?)"
   db.query(sql, [student, father, phone, address], (error, result) => {
     if (error) {
@@ -46,4 +47,18 @@ app.post("/students", (req, res) => {
       res.status(200).json(result)
     }
   });
+})
+
+app.delete("/students/:id", (req, res) => {
+  const id = req.params.id
+  // res.status(200).json(id);
+
+  const sql = "DELETE FROM student WHERE id = ?"
+  db.query(sql, [id], (error, result) => {
+    if (error) {
+      res.status(400).json(error);
+    } else {
+      res.status(200).json(result);
+    }
+  })
 })
