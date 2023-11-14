@@ -29,7 +29,8 @@ function addSqliteAPIs(app) {
       const sql = `INSERT INTO persons (fname,lname) VALUES (?,?)`
       db.run(sql, [fname, lname], (error) => {
         if (error) return res.status(500).json(error)
-        return res.status(200).json(this.lastID)
+        // console.log(this.lastID);
+        return res.status(200).json('added...')
       })
     }
   })
@@ -67,21 +68,26 @@ function addSqliteAPIs(app) {
 
   app.post("/api/register", (req, res) => {
     const { username, password } = req.body
-    const sql = `INSERT INTO users (username, password) VALUES (?,?)`
-    bcrypt
-      .genSalt(saltRounds)
-      .then(salt => {
-        return bcrypt.hash(password, salt)
-      })
-      .then(hash => {
-        db.run(sql, [username, hash], (error) => {
-          if (error) return res.status(200).json(error)
-          return res.status(200).json("registration success")
+    let sql = `SELECT id FROM users WHERE username=?`
+    db.get(sql, [username], (error, result) => {
+      if (error) return res.status(500).json(error)
+      if (result) return res.status(200).json('User aleady exists')
+      sql = `INSERT INTO users (username, password) VALUES (?,?)`
+      bcrypt
+        .genSalt(saltRounds)
+        .then(salt => {
+          return bcrypt.hash(password, salt)
         })
-      })
-      .catch(err => {
-        return res.status(500).json(err)
-      })
+        .then(hash => {
+          db.run(sql, [username, hash], (error) => {
+            if (error) return res.status(200).json(error)
+            return res.status(200).json("registration success")
+          })
+        })
+        .catch(err => {
+          return res.status(500).json(err)
+        })
+    })
   })
 
   app.post("/api/login", (req, res) => {
